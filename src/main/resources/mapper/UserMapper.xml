@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.auction.mapper.UserMapper">
+    <resultMap id="BaseResultMap" type="com.auction.dto.UserDTO">
+        <result column="id" jdbcType="BIGINT" property="id" />
+        <result column="username" jdbcType="VARCHAR" property="username" />
+        <result column="realName" jdbcType="VARCHAR" property="realName" />
+        <result column="perDescribe" jdbcType="VARCHAR" property="perDescribe" />
+        <result column="phone" jdbcType="VARCHAR" property="phone" />
+        <result column="type" jdbcType="BIGINT" property="type" />
+    </resultMap>
+
+    <select id="selectByUsername"  resultType="com.auction.entity.User">
+        SELECT * FROM user WHERE username = #{username}
+    </select>
+
+
+    <select id="selectUserCount" parameterType="java.util.Map" resultType="long">
+        SELECT count(*) FROM  user
+        <where>
+            <if test="username != null and username != ''">
+                AND username like CONCAT(CONCAT('%',#{username},'%'))
+            </if>
+            <if test="realName != null and realName != ''">
+                AND real_name like CONCAT(CONCAT('%',#{realName},'%'))
+            </if>
+            <if test="type != null and type != ''">
+                AND type = #{type}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectUserList" parameterType="java.util.Map" resultMap="BaseResultMap">
+        SELECT
+            id,username, real_name realName, phone, type, per_describe perDescribe
+        FROM
+            user
+        <where>
+            <if test="username != null and username != ''">
+                AND username like CONCAT(CONCAT('%',#{username},'%'))
+            </if>
+            <if test="realName != null and realName != ''">
+                AND real_name like CONCAT(CONCAT('%',#{realName},'%'))
+            </if>
+            <if test="type != null and type != ''">
+                AND type = #{type}
+            </if>
+        </where>
+        <choose>
+            <when test=" sortname!=null and sortname!=''">
+                order by ${sortname} ${sortorder}
+            </when>
+            <otherwise>
+                order by id asc
+            </otherwise>
+        </choose>
+        <if test="start != null and count != null">
+            LIMIT #{start},#{count}
+        </if>
+    </select>
+
+</mapper>

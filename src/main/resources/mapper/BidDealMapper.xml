@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.auction.mapper.BidDealMapper">
+
+    <select id="selectLotList" parameterType="java.util.Map" resultType="com.auction.entity.BidDeal">
+        SELECT
+            *
+        FROM
+        bid_deal
+        WHERE
+        lot_id = #{lotId}
+    </select>
+
+
+    <select id="getWebMyBidList" parameterType="java.util.List" resultType="com.auction.dto.BidDealDTO">
+        SELECT
+            deal.*,
+            m.name,
+            m.notice_title noticeTitle,
+            m.link_man linkMan,
+            m.link_phone linkPhone,
+            l.images images
+        FROM
+            auction.bid_deal deal
+        LEFT JOIN
+            meet m ON deal.meet_id = m.id
+            Left Join lot l on deal.lot_id = l.id
+            WHERE
+            deal.bidder_id = #{bidderId}
+    </select>
+
+    <select id="getWebCheckPay" parameterType="java.util.Map" resultType="com.auction.dto.BidDealDTO">
+        SELECT
+             *
+        FROM
+             auction.bid_deal
+         WHERE
+            bidder_id = #{bidderId}   AND lot_id = #{lotId}
+    </select>
+    <select id="getWebPay" parameterType="java.util.Map" resultType="com.auction.entity.BidDeal">
+        SELECT
+            *
+        FROM
+            auction.bid_deal
+        WHERE
+            bidder_id = #{bidderId}   AND lot_id = #{lotId}
+    </select>
+
+    <select id="dealInfoByLotId" parameterType="java.util.Map" resultType="com.auction.entity.BidDeal">
+        SELECT
+            *
+        FROM
+            auction.bid_deal
+        WHERE
+            lot_id = #{lotId}
+    </select>
+
+
+</mapper>

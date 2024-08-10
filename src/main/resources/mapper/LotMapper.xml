@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.auction.mapper.LotMapper">
+
+    <select id="selectLotCount" parameterType="java.util.Map" resultType="long">
+        SELECT
+            count(*)
+        FROM
+             lot l
+        LEFT JOIN
+            meet m ON m.id = l.meet_id
+        <where>
+            <if test="name != null and name != ''">
+                AND l.name like CONCAT(CONCAT('%',#{name},'%'))
+            </if>
+            <if test="meetName != null and meetName != ''">
+                AND m.name like CONCAT(CONCAT('%',#{meetName},'%'))
+            </if>
+            <if test="auctionStatus != null ">
+                AND auction_status = #{auctionStatus}
+            </if>
+            <if test="meetId != null and meetId != ''">
+                AND m.id = #{meetId}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectLotList" parameterType="java.util.Map" resultType="com.auction.dto.LotDTO">
+        SELECT
+            l.id id,
+            l.name name,
+            l.start_price startPrice,
+            l.assess_price assessPrice,
+            l.increase_price increasePrice,
+            l.auction_status auctionStatus,
+            l.deal_price dealPrice,
+            l.images images,
+            l.order_sort orderSort,
+            l.content content,
+            l.remarks remarks,
+            m.name meetName,
+            m.meet_state meetState,
+            m.id meetId
+        FROM
+            lot l
+        LEFT JOIN
+            meet m ON m.id = l.meet_id
+        <where>
+            <if test="name != null and name != ''">
+                AND l.name like CONCAT(CONCAT('%',#{name},'%'))
+            </if>
+            <if test="meetName != null and meetName != ''">
+                AND m.name like CONCAT(CONCAT('%',#{meetName},'%'))
+            </if>
+            <if test="auctionStatus != null ">
+                AND auction_status = #{auctionStatus}
+            </if>
+            <if test="meetId != null and meetId != ''">
+                AND m.id = #{meetId}
+            </if>
+        </where>
+        <choose>
+            <when test=" sortname!=null and sortname!=''">
+                order by ${sortname} ${sortorder}
+            </when>
+            <otherwise>
+                order by id desc
+            </otherwise>
+        </choose>
+        <if test="start != null and count != null">
+            LIMIT #{start},#{count}
+        </if>
+
+    </select>
+
+    <select id="getWebLotList" resultType="com.auction.dto.WebAuctionDTO">
+        SELECT
+            l.id lotId,
+            l.name lotName,
+            l.start_price startPrice,
+            l.auction_status auctionStatus,
+            l.deal_price dealPrice,
+            l.images images,
+            m.name meetName,
+            m.id meetId
+        FROM
+        lot l
+        LEFT JOIN
+        meet m ON m.id = l.meet_id
+        <where>
+            <if test="meetId != null and meetId != ''">
+                AND m.id = #{meetId}
+            </if>
+        </where>
+        <choose>
+            <when test=" sort != null">
+                order by l.id DESC
+            </when>
+            <otherwise>
+                ORDER BY l.order_sort ASC
+            </otherwise>
+        </choose>
+        limit #{start},#{count}
+    </select>
+
+    <select id="getWebAllLotListByMeetId" resultType="com.auction.dto.WebAuctionDTO">
+        SELECT
+            l.id lotId,
+            l.name lotName,
+            l.start_price startPrice,
+            l.assess_price assessPrice,
+            l.increase_price increasePrice,
+            l.auction_status auctionStatus,
+            l.deal_price dealPrice,
+            l.images images,
+            l.content lotContent,
+            m.id meetId,
+            m.name meetName,
+            m.meet_state meetState,
+            m.start_time startTime,
+            m.end_time endTime,
+            m.deadline_time deadlineTime,
+            m.publish_by publishBy,
+            m.link_phone linkPhone
+        FROM
+          lot l
+        LEFT JOIN
+          meet m ON m.id = l.meet_id
+        <where>
+            <if test="meetId != null and meetId != ''">
+                AND m.id = #{meetId}
+            </if>
+        </where>
+        ORDER BY l.order_sort ASC
+    </select>
+
+    <select id="getWebLotCount" resultType="int">
+        SELECT count(1) FROM lot
+        <where>
+            <if test="meetId != null and meetId != ''">
+                AND meet_id = #{meetId}
+            </if>
+        </where>
+    </select>
+
+
+    <select id="getWebMyBidByBidderId" resultType="com.auction.dto.LotDTO">
+        SELECT
+            l.id lotId,
+            l.name lotName,
+            l.deal_price dealPrice,
+            l.images images,
+            l.is_pay isPay,
+            l.bidder_num bidderNUm,
+            l.bidder_id bidderId,
+            m.link_man linkMan,
+            m.link_phone linkPhone,
+            m.id   meetId
+        FROM
+             lot l
+        LEFT JOIN
+            meet m ON l.meet_id =m.id
+        WHERE
+            l.bidder_id = #{bidderId}
+        ORDER BY l.order_sort ASC
+
+    </select>
+
+
+
+</mapper>

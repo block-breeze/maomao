@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.auction.mapper.MeetMapper">
+
+    <select id="selectMeetCount" parameterType="java.util.Map" resultType="long">
+        SELECT count(*) FROM meet
+        <where>
+            <if test="name != null and name != ''">
+                AND name like CONCAT(CONCAT('%',#{name},'%'))
+            </if>
+            <if test="meetState != null and meetState != ''">
+                AND meet_state = #{meetState}
+            </if>
+            <if test="publishState != null ">
+                AND publish_state = #{publishState}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectMeetList" parameterType="java.util.Map" resultType="com.auction.dto.MeetDTO">
+        SELECT
+            id id,
+            name name ,
+            notice_id noticeId,
+            notice_title noticeTitle,
+            meet_state meetState,
+            publish_state publishState,
+            publish_time publishTime,
+            start_time startTime,
+            end_time endTime,
+            logo logo,
+            deadline_time deadlineTime,
+            link_man linkMan,
+            link_phone linkPhone,
+            (SELECT
+                 COUNT(*)
+            FROM
+                auction.lot lot
+            WHERE
+                 lot.meet_id = meet.id) AS lotCount
+        FROM
+        meet
+        <where>
+            <if test="name != null and name != ''">
+                AND name like CONCAT(CONCAT('%',#{name},'%'))
+            </if>
+            <if test="meetState != null and meetState != ''">
+                AND meet_state = #{meetState}
+            </if>
+            <if test="publishState != null ">
+                AND publish_state = #{publishState}
+            </if>
+        </where>
+        <choose>
+            <when test=" sortname!=null and sortname!=''">
+                order by ${sortname} ${sortorder}
+            </when>
+            <otherwise>
+                order by id desc
+            </otherwise>
+        </choose>
+        <if test="start != null and count != null">
+            LIMIT #{start},#{count}
+        </if>
+
+    </select>
+
+    <select id="getMeetById" parameterType="java.util.Map" resultType="com.auction.dto.MeetDTO">
+        SELECT
+            m.id,
+            m.name,
+            m.logo,
+            m.start_time startTime,
+            m.link_man linkMan,
+            m.link_phone linkPhone,
+            m.meet_state meetState,
+            m.deadline_time deadline_time,
+            (SELECT
+                    COUNT(*)
+                FROM
+                    auction.lot lot
+                WHERE
+                   lot.meet_id=#{id}) AS lotCount
+        FROM
+            auction.meet m
+        WHERE m.id=#{id}
+    </select>
+
+    <select id="noticesListTen" resultType="java.util.HashMap"   parameterType="java.util.Map">
+        SELECT
+        n.id noticeId,
+        n.title AS noticeTitle
+        FROM
+        auction.notice n
+        LEFT JOIN meet m ON n.id=m.notice_id
+        <where>
+         m.notice_id IS NULL AND n.state = 0
+            <if test='noticeTitle != null and noticeTitle.trim() != "" and noticeTitle !="*" '>
+                AND n.title LIKE #{noticeTitle}
+            </if>
+        </where>
+        ORDER BY n.create_time DESC
+/*limit 0,10*/
+     </select>
+
+    <select id="getNoticeNameByNoticeId" parameterType="java.util.Map" resultType="com.auction.dto.NoticeDTO">
+        SELECT
+            id,
+            title,
+            publish_by publishBy
+        FROM
+            auction.notice
+        WHERE id = #{id}
+    </select>
+
+    <select id="getWebMeetList" resultType="com.auction.dto.WebAuctionDTO">
+    SELECT
+        id meetId,
+        name meetName,
+        logo,
+        publish_by publishBy,
+        start_time startTime,
+        meet_state meetState,
+        publish_state publishstate,
+        end_time endTime,
+        (SELECT
+                COUNT(*)
+            FROM
+                 auction.lot lot
+            WHERE
+                 lot.meet_id = meetId) AS lotCount
+    FROM
+        meet
+    <where>
+        publish_state = 1
+        <if test="meetName != null and meetName != ''">
+            AND name like CONCAT(CONCAT('%',#{meetName},'%'))
+        </if>
+        <if test="meetState != null ">
+            AND meet_state = #{meetState}
+        </if>
+    </where>
+    ORDER BY FIELD(meet_state,2,1,3) ASC,start_time DESC
+        limit #{start},#{count}
+</select>
+
+    <select id="getWebMeetCount" resultType="int">
+		SELECT count(1) FROM meet
+        <where>
+            publish_state = 1
+            <if test="meetName != null and meetName != ''">
+                AND name like CONCAT(CONCAT('%',#{meetName},'%'))
+            </if>
+            <if test="meetState != null ">
+                AND meet_state = #{meetState}
+            </if>
+        </where>
+	</select>
+
+
+    <select id="getNoticeTitleByMeetId" parameterType="java.util.Map" resultType="com.auction.dto.MeetDTO">
+        SELECT
+            notice_id noticeId,
+            notice_title  noticeTitle
+        FROM
+            meet
+        WHERE id=#{meetId}
+    </select>
+
+
+   <select id="getMeetByNoticeId" parameterType="java.util.Map" resultType="com.auction.entity.Meet">
+    SELECT * FROM meet
+    WHERE notice_id = #{noticeId}
+   </select>
+
+    <select id="checkNameIsExist" parameterType="java.util.Map" resultType="com.auction.entity.Meet">
+    SELECT * FROM meet
+    WHERE id !=#{id} AND name = #{name}
+   </select>
+
+
+
+
+    <select id="getMeetByBidderId" parameterType="java.util.List" resultType="com.auction.dto.MeetDTO">
+        SELECT
+            m.id id,
+            m.name name,
+            m.meet_state meetState,
+            m.start_time startTime,
+            m.end_time endTime,
+            m.logo logo,
+            m.link_man linkMan,
+            m.link_phone linkPhone,
+            (SELECT
+                    COUNT(*)
+                FROM
+                    auction.lot lot
+                WHERE
+                    lot.meet_id = m.id) AS lotCount
+        FROM
+            meet m
+        LEFT JOIN
+            bidder b ON b.meet_id = m.id
+        WHERE
+            b.bidder_id = #{bidderId}
+
+    </select>
+
+</mapper>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.auction.mapper.BidderMapper">
+
+    <select id="getByMeetIdAndBidderId"  resultType="com.auction.entity.Bidder">
+        SELECT * FROM bidder WHERE meet_id = #{meetId} AND bidder_id = #{bidderId}
+    </select>
+
+    <select id="selectBidderCount" parameterType="java.util.Map" resultType="long">
+        SELECT count(*) FROM bidder
+        <where>
+            <if test="meetId != null and meetId != ''">
+                AND meet_id = #{meetId}
+            </if>
+            <if test="isDeal != null and isDeal != ''">
+                AND is_deal = #{isDeal}
+            </if>
+        </where>
+    </select>
+
+
+    <select id="selectBidderList" parameterType="java.util.Map" resultType="com.auction.dto.BidderDTO">
+        SELECT
+            b.id id,
+            b.bidder_num bidderNum,
+            b.create_time createTime,
+            u.id bidderId,
+            u.username bidderName,
+            u.phone phone,
+            u.id_card idCard,
+            b.meet_id meetId
+        FROM
+             auction.bidder b
+        LEFT JOIN
+            auction.users_info u ON u.id = b.bidder_id
+        <where>
+            <if test="meetId != null and meetId != ''">
+                AND b.meet_id = #{meetId}
+            </if>
+            <if test="isDeal != null and isDeal != ''">
+                AND b.is_deal = #{isDeal}
+            </if>
+        </where>
+        <if test="start != null and count != null">
+            LIMIT #{start},#{count}
+        </if>
+    </select>
+   <!-- <select id="selectByPhone"  resultType="com.auction.entity.UsersInfo">
+        SELECT * FROM users_info WHERE phone = #{phone}
+    </select>
+
+
+
+
+
+    <select id="getAdminType"  resultType="com.auction.dto.UsersInfoDTO">
+        SELECT type FROM user WHERE id = #{id}
+    </select>
+
+    <select id="checkMeet"  resultType="com.auction.entity.Meet">
+        SELECT * FROM meet WHERE id = #{meetId}
+    </select>-->
+
+<!--    <select id="getBidInfoByBidderId"  resultType="com.auction.entity.UsersInfo">
+        SELECT
+            *
+        FROM
+            users_info
+        WHERE
+            username = #{username}
+        AND id_card = #{idCard}
+        AND phone = #{phone}
+    </select>-->
+</mapper>

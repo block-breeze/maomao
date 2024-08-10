@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.auction.mapper.NoticeMapper">
+
+    <select id="selectNoticeCount" parameterType="java.util.Map" resultType="long">
+        SELECT count(*) FROM notice
+        <where>
+            <if test="title != null and title != ''">
+                AND title like CONCAT(CONCAT('%',#{title},'%'))
+            </if>
+            <if test="state != null ">
+                AND state = #{state}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectNoticeList" parameterType="java.util.Map" resultType="com.auction.dto.NoticeDTO">
+        SELECT
+        id id,
+        title title,
+        meet_id meetId,
+        meet_name meetName,
+        short_describe shortDescribe,
+        reject reject,
+        publish_time publishTime,
+        publish_by  publishBy,
+        content ,
+        state state
+        FROM
+        notice
+        <where>
+            <if test="title != null and title != ''">
+                AND title like CONCAT(CONCAT('%',#{title},'%'))
+            </if>
+            <if test="state != null">
+                AND state = #{state}
+            </if>
+        </where>
+        <choose>
+            <when test=" sortname!=null and sortname!=''">
+                order by ${sortname} ${sortorder}
+            </when>
+            <otherwise>
+                order by id desc
+            </otherwise>
+        </choose>
+        <if test="start != null and count != null">
+            LIMIT #{start},#{count}
+        </if>
+
+    </select>
+    <select id="getNoticeDetailById" parameterType="java.util.Map" resultType="com.auction.dto.NoticeDTO">
+        SELECT
+            n.id id,
+            n.title title,
+            n.state state,
+            n.content content,
+            n.publish_by publishBy,
+            n.publish_time publishTime,
+            m.id meetId,
+            m.name meetName,
+            m.start_time startTime,
+            m.meet_state meetState,
+            m.logo logo
+        FROM
+            auction.notice n
+        LEFT JOIN
+            auction.meet m ON n.meet_id = m.id
+        WHERE n.id=#{id}
+    </select>
+
+    <select id="relationById" parameterType="java.util.Map" resultType="com.auction.entity.Meet">
+    SELECT
+        m.id id,
+        m.name name
+    FROM
+        auction.meet m
+    LEFT JOIN
+        auction.notice n ON n.id = m.notice_id
+    WHERE
+        state != 1 AND n.id=#{id}
+    </select>
+
+    <select id="cancelRelationById" parameterType="java.util.Map" resultType="com.auction.dto.NoticeDTO">
+    SELECT
+        meet_id meetId,
+        meet_name meetName
+    FROM
+        notice
+    WHERE
+       state != 1 AND  id=#{id}
+    </select>
+
+    <select id="getWebNoticeById" parameterType="java.util.Map" resultType="com.auction.dto.WebAuctionDTO">
+        SELECT
+            n.id noticeId,
+            n.title noticeTitle,
+            n.content content,
+            n.publish_by publishBy,
+            n.publish_time publishTime
+        FROM
+            notice n
+        WHERE n.meet_id=#{meetId}
+    </select>
+
+    <select id="getWebNoticeList" resultType="com.auction.dto.WebAuctionDTO">
+        SELECT
+            id noticeId,
+            title noticeTitle,
+            meet_name meetName,
+            short_describe shortDescribe,
+            publish_time publishTime
+        FROM
+            notice
+        <where>
+            state = 1
+            <if test="noticeTitle != null and noticeTitle != ''">
+                AND title like CONCAT(CONCAT('%',#{noticeTitle},'%'))
+            </if>
+        </where>
+        ORDER BY id desc
+        limit #{start},#{count}
+    </select>
+
+    <select id="getWebNoticeCount" resultType="int">
+        SELECT count(1) FROM notice
+        <where>
+            state = 1
+            <if test="noticeTitle != null and noticeTitle != ''">
+                AND title like CONCAT(CONCAT('%',#{noticeTitle},'%'))
+            </if>
+        </where>
+    </select>
+
+    <select id="checkNoticeTitle" resultType="com.auction.entity.Notice">
+        SELECT * FROM notice where id != #{id} AND title = #{title}
+    </select>
+</mapper>

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.auction.mapper.NewsMapper">
+
+    <select id="selectNewsCount" parameterType="java.util.Map" resultType="long">
+        SELECT count(*) FROM news
+        <where>
+            <if test="title != null and title != ''">
+                AND title like CONCAT(CONCAT('%',#{title},'%'))
+            </if>
+            <if test="publishBy != null and publishBy != ''">
+                AND publish_by like CONCAT(CONCAT('%',#{publishBy},'%'))
+            </if>
+            <if test="state != null and state != ''">
+                AND state = #{state}
+            </if>
+            <if test="module != null and module != ''">
+                AND module = #{module}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectNewsList" parameterType="java.util.Map" resultType="com.auction.dto.NewsDTO">
+        SELECT
+            id,
+            title,
+            module,
+            state,
+            publish_by publishBy,
+            publish_time publishTime,
+            create_time createTime,
+            read_amount readAmount,
+            content,
+            reject
+        FROM
+            news
+        <where>
+            <if test="title != null and title != ''">
+                AND title like CONCAT(CONCAT('%',#{title},'%'))
+            </if>
+            <if test="publishBy != null and publishBy != ''">
+                AND publish_by like CONCAT(CONCAT('%',#{publishBy},'%'))
+            </if>
+            <if test="state != null and state != ''">
+                AND state = #{state}
+            </if>
+            <if test="module != null and module != ''">
+                AND module = #{module}
+            </if>
+        </where>
+        <choose>
+            <when test=" sortname!=null and sortname!=''">
+                order by ${sortname} ${sortorder}
+            </when>
+            <otherwise>
+                order by create_time DESC
+            </otherwise>
+        </choose>
+        <if test="start != null and count != null">
+            LIMIT #{start},#{count}
+       </if>
+
+    </select>
+    <select id="getNewsById" parameterType="java.util.Map" resultType="com.auction.dto.NewsDTO">
+        SELECT
+            id,
+            title,
+            module,
+            state,
+            content,
+            publish_by publishBy,
+            publish_time publishTime
+        FROM
+            news
+        WHERE
+            id=#{id}
+    </select>
+    <select id="getWebNews" parameterType="java.util.Map" resultType="com.auction.dto.WebNewsDTO">
+    SELECT
+        id,
+        title,
+        publish_by publishBy,
+        publish_time publishTime
+    FROM
+        news
+    WHERE state = 1
+    ORDER BY publish_time DESC
+    LIMIT #{count}
+</select>
+<select id="getWebNewsList" resultType="com.auction.dto.WebNewsDTO">
+    SELECT
+        id,
+        title,
+        publish_by publishBy,
+        publish_time publishTime
+    FROM
+        news
+    WHERE state = 1
+    ORDER BY publish_time DESC
+        limit #{start},#{count}
+</select>
+
+    <select id="getWebNewsCount" resultType="int">
+		SELECT count(1) FROM news WHERE state = 1
+	</select>
+</mapper>

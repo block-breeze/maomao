@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.auction.mapper.UsersInfoMapper">
+
+    <select id="selectByUsername"  resultType="com.auction.entity.UsersInfo">
+        SELECT * FROM users_info WHERE username = #{username}
+    </select>
+
+    <select id="selectByUsernameOrPhone"  resultType="com.auction.entity.UsersInfo">
+        SELECT
+           *
+        FROM
+            users_info
+        WHERE
+            username = #{username} OR username = #{phone}
+    </select>
+
+    <select id="checkBid"  resultType="com.auction.entity.UsersInfo">
+        SELECT
+            *
+        FROM
+            users_info
+        WHERE
+            username = #{username}
+        AND id_card = #{idCard}
+        AND phone = #{phone}
+    </select>
+
+    <select id="selectByPhone"  resultType="com.auction.entity.UsersInfo">
+        SELECT * FROM users_info WHERE phone = #{phone}
+    </select>
+
+    <select id="selectUsersInfoCount" parameterType="java.util.Map" resultType="long">
+        SELECT count(*) FROM users_info
+        <where>
+            <if test="username != null and username != ''">
+                AND username like CONCAT(CONCAT('%',#{username},'%'))
+            </if>
+            <if test="realName != null and realName != ''">
+                AND real_name like CONCAT(CONCAT('%',#{realName},'%'))
+            </if>
+            <if test="isReal != null">
+                AND is_real = #{isReal}
+            </if>
+
+        </where>
+    </select>
+
+    <select id="selectUsersInfoList" parameterType="java.util.Map" resultType="com.auction.dto.UsersInfoDTO">
+        SELECT
+            id id,
+            username username,
+            real_name realName,
+            phone phone,
+            mail mail,
+            id_card idCard,
+            is_real isReal
+        FROM
+            users_info
+        <where>
+            <if test="username != null and username != ''">
+                AND username like CONCAT(CONCAT('%',#{username},'%'))
+            </if>
+            <if test="realName != null and realName != ''">
+                AND real_name like CONCAT(CONCAT('%',#{realName},'%'))
+            </if>
+            <if test="isReal != null">
+                AND is_real = #{isReal}
+            </if>
+
+        </where>
+        <if test="start != null and count != null">
+            LIMIT #{start},#{count}
+        </if>
+    </select>
+
+    <select id="getAdminType"  resultType="com.auction.dto.UsersInfoDTO">
+        SELECT type FROM user WHERE id = #{id}
+    </select>
+
+    <select id="checkMeet"  resultType="com.auction.entity.Meet">
+        SELECT * FROM meet WHERE id = #{meetId}
+    </select>
+</mapper>
